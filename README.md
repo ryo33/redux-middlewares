@@ -10,10 +10,10 @@ $ npm install -S redux-middlewares
 ```
 
 ## API
-- [x] [createMiddleware(...matchers, callback)](#createmiddlewarematchers-callback)
-- [ ] [createFilter(...matchers, filter)](#createfiltermatchers-filter)
-- [ ] [createTransformer(...matchers, transformer)](#createtransformermatchers-transformer)
-- [ ] [createReplacer(...matchers, replacer)](#createreplacermatchers-replacer)
+- [createMiddleware(...matchers, callback)](#createmiddlewarematchers-callback)
+- [createFilter(...matchers, filter)](#createfiltermatchers-filter)
+- [createTransformer(...matchers, transformer)](#createtransformermatchers-transformer)
+- [createReplacer(...matchers, replacer)](#createreplacermatchers-replacer)
 
 ### createMiddleware(...matchers, callback)
 Calls the given callback only an action is matched to all matchers.

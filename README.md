@@ -10,17 +10,36 @@ $ npm install -S redux-middlewares
 ```
 
 ## API
-- [x] [createMiddleware(matcher, callback)](#createmiddlewarematcher-callback)
-- [ ] createFilter(matcher, [filter])
-- [ ] createTransformer(matcher, [filter], transformer)
-- [ ] createReplacer(matcher, [filter], replacer)
+- [ ] [createMiddleware(...matchers, callback)](#createmiddlewarematchers-callback)
+- [ ] [createFilter(...matchers, filter)](#createfiltermatchers-filter)
+- [ ] [createTransformer(...matchers, transformer)](#createtransformermatchers-transformer)
+- [ ] [createReplacer(...matchers, replacer)](#createreplacermatchers-replacer)
 
-### createMiddleware(matcher, callback)
-Calls the given callback only the action is matched.
+### createMiddleware(...matchers, callback)
+Calls the given callback only an action is matched to all matchers.
 
-- `matcher` string | array | (action => bool)
+By caching, it does not call `store.getState` more than once.  
+All other middleware generators use this function internally.  
+
+- `matcher` string | array | ({action, getState}) => boolean
   - **string** An action type to match
   - **array** An array of action types to match
-  - **action => bool** A function returns true if matched
+  - **({action, getState}) => boolean** A function returns true if matched
 - `callback` ({getState, dispatch, nextDispatch, action}) => any
 
+### createFilter(...matchers, filter)
+Filters actions.
+
+It calls `nextDispatch` if the filter returns true.  
+
+- `filter` ({action, getState}) => boolean
+
+### createTransformer(...matchers, transformer)
+Transforms an action in the middleware layer.
+
+- `transformer` ({action, getState}) => action
+
+### createReplacer(...matchers, replacer)
+Discards an action and dispatch a new one.
+
+- `replacer` ({action, getState}) => action

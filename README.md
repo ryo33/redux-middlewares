@@ -10,7 +10,7 @@ $ npm install -S redux-middlewares
 ```
 
 ## API
-- [ ] [createMiddleware(...matchers, callback)](#createmiddlewarematchers-callback)
+- [x] [createMiddleware(...matchers, callback)](#createmiddlewarematchers-callback)
 - [ ] [createFilter(...matchers, filter)](#createfiltermatchers-filter)
 - [ ] [createTransformer(...matchers, transformer)](#createtransformermatchers-transformer)
 - [ ] [createReplacer(...matchers, replacer)](#createreplacermatchers-replacer)
@@ -18,7 +18,7 @@ $ npm install -S redux-middlewares
 ### createMiddleware(...matchers, callback)
 Calls the given callback only an action is matched to all matchers.
 
-By caching, it does not call `store.getState` more than once.  
+By caching, it does not call `store.getState` more than once at matching.  
 All other middleware generators use this function internally.  
 
 - `matcher` string | array | ({action, getState}) => boolean

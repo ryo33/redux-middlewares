@@ -6,8 +6,8 @@ chai.use(sinonChai)
 
 const { createMiddleware } = require('../lib/index.js')
 
-describe('createMiddleware(action, callback)', function() {
-  it('it should call the callback only the action is matched', function() {
+describe('createMiddleware(...matchers, callback)', function() {
+  it('should call the callback only the action is matched', function() {
     const TYPE1 = 'TYPE 1'
     const TYPE2 = 'TYPE 2'
     const TYPE3 = 'TYPE 3'
@@ -15,47 +15,94 @@ describe('createMiddleware(action, callback)', function() {
     const action2 = {type: TYPE2, payload: true}
     const action3 = {type: TYPE3, payload: false}
 
-    const getState = () => ({})
+    const state = {}
+    const getState = () => state
     const dispatch = () => {}
     const store = {getState, dispatch}
     const nextDispatch = () => {}
 
-    const singleTypeCallback = sinon.spy()
+    const getCallback = () => sinon.spy(({getState, dispatch, nextDispatch}) => {
+      expect(getState()).to.equal(state)
+      expect(dispatch).to.equal(dispatch)
+      expect(nextDispatch).to.equal(nextDispatch)
+    })
+
+    const singleTypeCallback = getCallback()
     const singleTypeMiddleware = createMiddleware(TYPE1, singleTypeCallback)
 
-    const arrayTypesCallback = sinon.spy()
+    const arrayTypesCallback = getCallback()
     const array = [TYPE1, TYPE2]
     const arrayTypesMiddleware = createMiddleware(array, arrayTypesCallback)
 
-    const matcherCallback = sinon.spy()
-    const matcher = action => action.type === TYPE3 || action.payload
+    const matcherCallback = getCallback()
+    const matcher = ({action}) => action.type === TYPE3 || action.payload
     const matcherMiddleware = createMiddleware(matcher, matcherCallback)
+
+    const multiMatcherCallback = sinon.spy()
+    const multiMatcherMiddleware = createMiddleware(
+      array, matcher,
+      multiMatcherCallback
+    )
 
     singleTypeMiddleware(store)(nextDispatch)(action1)
     singleTypeMiddleware(store)(nextDispatch)(action2)
     singleTypeMiddleware(store)(nextDispatch)(action3)
-    expect(singleTypeCallback.args).to.eql([
-      [{getState, dispatch, nextDispatch, action: action1}]
-    ])
+    expect(singleTypeCallback).to.have.been.calledOnce
+    expect(singleTypeCallback.args[0][0].action).to.equal(action1)
 
     arrayTypesMiddleware(store)(nextDispatch)(action1)
     arrayTypesMiddleware(store)(nextDispatch)(action2)
     arrayTypesMiddleware(store)(nextDispatch)(action3)
-    expect(arrayTypesCallback.args).to.eql([
-      [{getState, dispatch, nextDispatch, action: action1}],
-      [{getState, dispatch, nextDispatch, action: action2}]
-    ])
+    expect(arrayTypesCallback).to.have.been.calledTwice
+    expect(arrayTypesCallback.args[0][0].action).to.equal(action1)
+    expect(arrayTypesCallback.args[1][0].action).to.equal(action2)
 
     matcherMiddleware(store)(nextDispatch)(action1)
     matcherMiddleware(store)(nextDispatch)(action2)
     matcherMiddleware(store)(nextDispatch)(action3)
-    expect(matcherCallback.args).to.eql([
-      [{getState, dispatch, nextDispatch, action: action2}],
-      [{getState, dispatch, nextDispatch, action: action3}]
-    ])
+    expect(matcherCallback).to.have.been.calledTwice
+    expect(matcherCallback.args[0][0].action).to.equal(action2)
+    expect(matcherCallback.args[1][0].action).to.equal(action3)
+
+    multiMatcherMiddleware(store)(nextDispatch)(action1)
+    multiMatcherMiddleware(store)(nextDispatch)(action2)
+    multiMatcherMiddleware(store)(nextDispatch)(action3)
+    expect(multiMatcherCallback).to.have.been.calledOnce
+    expect(multiMatcherCallback.args[0][0].action).to.equal(action2)
   })
 
-  it('it should return the result of nextDispatch', function() {
+  it('should always call the callback if no matcher is given', function() {
+    const TYPE1 = 'TYPE 1'
+    const TYPE2 = 'TYPE 2'
+    const TYPE3 = 'TYPE 3'
+    const action1 = {type: TYPE1, payload: false}
+    const action2 = {type: TYPE2, payload: true}
+    const action3 = {type: TYPE3, payload: false}
+
+    const state = {}
+    const getState = () => state
+    const dispatch = () => {}
+    const store = {getState, dispatch}
+    const nextDispatch = () => {}
+
+    const getCallback = () => sinon.spy(({getState, dispatch, nextDispatch}) => {
+      expect(getState()).to.equal(state)
+      expect(dispatch).to.equal(dispatch)
+      expect(nextDispatch).to.equal(nextDispatch)
+    })
+    const callback = getCallback()
+    const middleware = createMiddleware(callback)
+
+    middleware(store)(nextDispatch)(action1)
+    middleware(store)(nextDispatch)(action2)
+    middleware(store)(nextDispatch)(action3)
+    expect(callback).to.have.been.calledThrise
+    expect(callback.args[0][0].action).to.equal(action1)
+    expect(callback.args[1][0].action).to.equal(action2)
+    expect(callback.args[2][0].action).to.equal(action3)
+  })
+
+  it('should return the result of nextDispatch', function() {
     const TYPE1 = 'TYPE 1'
     const TYPE2 = 'TYPE 2'
     const action1 = {type: TYPE1, payload: false}
@@ -77,14 +124,11 @@ describe('createMiddleware(action, callback)', function() {
     expect(middleware(store)(nextDispatch)(action2)).to.equal(result2)
   })
 
-  it('it should call nextDispatch only the action is not matched', function() {
+  it('should call nextDispatch only the action is not matched', function() {
     const TYPE1 = 'TYPE 1'
     const TYPE2 = 'TYPE 2'
     const action1 = {type: TYPE1, payload: false}
     const action2 = {type: TYPE2, payload: true}
-
-    const result1 = {}
-    const result2 = {}
 
     const getState = () => ({})
     const dispatch = () => {}
@@ -100,5 +144,57 @@ describe('createMiddleware(action, callback)', function() {
     middleware(store)(nextDispatch)(action2)
     expect(nextDispatch).to.have.been.calledWithExactly(action2)
     expect(nextDispatch.calledOnce).to.true
+  })
+
+  it('should not call getState more than once at matching', function() {
+    const TYPE = 'TYPE'
+    const action = {type: TYPE, payload: false}
+
+    const state = {}
+    const getState = sinon.spy(() => state)
+    const dispatch = () => {}
+    const store = {getState, dispatch}
+    const nextDispatch = sinon.spy()
+
+    const expectGetStateToHaveBeenCalledOnce = () => {
+      expect(getState).to.have.been.calledOnce
+    }
+
+    const matcher1 = sinon.spy(({getState, action}) => {
+      expect(action).to.equal(action)
+      expect(getState()).to.equal(state)
+      expectGetStateToHaveBeenCalledOnce()
+      return true
+    })
+    const matcher2 = sinon.spy(({getState, action}) => {
+      expect(action).to.equal(action)
+      expect(getState()).to.equal(state)
+      expectGetStateToHaveBeenCalledOnce()
+      return true
+    })
+    const matcher3 = sinon.spy(({getState, action}) => {
+      expect(action).to.equal(action)
+      expect(getState()).to.equal(state)
+      expectGetStateToHaveBeenCalledOnce()
+      return true
+    })
+    const callback = sinon.spy(({getState, action}) => {
+      expect(action).to.equal(action)
+      expect(getState()).to.equal(state)
+    })
+    const middleware = createMiddleware(
+      matcher1, matcher2, matcher3, callback)
+
+    middleware(store)(nextDispatch)(action)
+    expect(matcher1).to.have.been.calledOnce
+    expect(matcher2).to.have.been.calledOnce
+    expect(matcher3).to.have.been.calledOnce
+    expect(callback).to.have.been.calledOnce
+    expect(getState).to.have.been.calledTwice
+
+    getState.reset()
+
+    middleware(store)(nextDispatch)(action)
+    expect(getState).to.have.been.calledTwice
   })
 })

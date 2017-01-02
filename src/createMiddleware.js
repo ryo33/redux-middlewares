@@ -1,17 +1,44 @@
-module.exports = (matcher, callback) => {
-  let finalMatcher
+function isMatched(matcher, getState, action) {
   if (Array.isArray(matcher)) {
-    finalMatcher = action => matcher.includes(action.type)
+    return matcher.includes(action.type)
   } else if (typeof matcher === 'function') {
-    finalMatcher = matcher
+    return matcher({getState, action})
   } else {
-    finalMatcher = action => action.type === matcher
+    return action.type === matcher
   }
-  return ({ getState, dispatch }) => nextDispatch => action => {
-    if (finalMatcher(action)) {
-      return callback({getState, dispatch, nextDispatch, action})
+}
+
+module.exports = (...matchers) => {
+  const callback = matchers.pop()
+  return ({ getState, dispatch }) => {
+    let getStateCached
+    let state
+    if (matchers.length >= 2) {
+      getStateCached = () => {
+        if (typeof state === 'undefined') {
+          state = getState()
+          return state
+        } else {
+          return state
+        }
+      }
     } else {
-      return nextDispatch(action)
+      getStateCached = getState
+    }
+    return nextDispatch => action => {
+      state = undefined
+      let matched = true
+      for (let i = 0; i < matchers.length; i ++) {
+        if (!isMatched(matchers[i], getStateCached, action)) {
+          matched = false
+          break
+        }
+      }
+      if (matched) {
+        return callback({getState, dispatch, nextDispatch, action})
+      } else {
+        return nextDispatch(action)
+      }
     }
   }
 }

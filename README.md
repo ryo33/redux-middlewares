@@ -4,7 +4,6 @@ A library to create middlewares.
 It fits to prototyping or small projects.
 
 ## Install
-Note: It has not been published yet.
 ```bash
 $ npm install -S redux-middlewares
 ```

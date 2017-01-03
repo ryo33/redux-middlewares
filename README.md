@@ -9,16 +9,20 @@ $ npm install -S redux-middlewares
 ```
 
 ## API
+- [composeMiddleware(...middlewares)](#composemiddlewaremiddlewares)
 - [createMiddleware(...matchers, callback)](#createmiddlewarematchers-callback)
 - [createFilter(...matchers, filter)](#createfiltermatchers-filter)
 - [createTransformer(...matchers, transformer)](#createtransformermatchers-transformer)
 - [createReplacer(...matchers, replacer)](#createreplacermatchers-replacer)
 
+### composeMiddleware(...middlewares)
+It works like Redux's `applyMiddleware` but returns a middleware instead of a store enhancer.
+
 ### createMiddleware(...matchers, callback)
 Calls the given callback only an action is matched to all matchers.
 
 By caching, it does not call `store.getState` more than once at matching.  
-All other middleware generators use this function internally.  
+All other `create*` functions use this function internally.  
 
 - `matcher` string | array | ({action, getState}) => boolean
   - **string** An action type to match

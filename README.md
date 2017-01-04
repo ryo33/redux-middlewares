@@ -8,6 +8,10 @@ It fits to prototyping or small projects.
 $ npm install -S redux-middlewares
 ```
 
+## Links and recipes
+- [Comparison with redux-thunk](https://gist.github.com/ryo33/c117058fe00b0000b3ab864a3a56fec7)
+- [Implementation of cancellation](https://github.com/ryo33/redux-pages/blob/18f30998628d7add6885411d3a32ab3976cb3087/example/src/middlewares.js#L22-L46)
+
 ## API
 - [composeMiddleware(...middlewares)](#composemiddlewaremiddlewares)
 - [createMiddleware(...matchers, callback)](#createmiddlewarematchers-callback)

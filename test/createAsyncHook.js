@@ -107,4 +107,33 @@ describe('createAsyncHook(...matchers, callback)', function() {
     clock.tick(1)
     expect(delayFunction).to.have.been.calledOnce
   })
+
+  it('should use the state before calling nextDispatch', function() {
+    const TYPE1 = 'TYPE 1'
+    const action1 = {type: TYPE1, payload: false}
+
+    const state1 = {}
+    const state2 = {}
+    let state = state1
+    const getState = () => state
+    const dispatch = () => {}
+    const store = {getState, dispatch}
+    const nextDispatch = () => state = state2
+
+    const matcher1 = ({getState}) => {
+      expect(getState()).to.equal(state1)
+      return true
+    }
+    const callback1 = sinon.spy(({getState, dispatch}) => {
+      expect(getState()).to.equal(state1)
+      expect(dispatch).to.equal(dispatch)
+    })
+    const middleware1 = createAsyncHook(matcher1, callback1)
+
+    expect(store.getState()).not.to.equal(state2)
+    middleware1(store)(nextDispatch)(action1)
+    expect(store.getState()).to.equal(state2)
+    clock.tick(1)
+    expect(callback1).to.have.been.calledOnce
+  })
 })

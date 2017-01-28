@@ -15,6 +15,7 @@ $ npm install -S redux-middlewares
 ## API
 - [composeMiddleware(...middlewares)](#composemiddlewaremiddlewares)
 - [createMiddleware(...matchers, callback)](#createmiddlewarematchers-callback)
+- [createAsyncHook(...matchers, callback)](#createasynchookmatchers-callback)
 - [createFilter(...matchers, filter)](#createfiltermatchers-filter)
 - [createTransformer(...matchers, transformer)](#createtransformermatchers-transformer)
 - [createReplacer(...matchers, replacer)](#createreplacermatchers-replacer)
@@ -33,6 +34,18 @@ All other `create*` functions use this function internally.
   - **array** An array of action types to match
   - **({action, getState}) => boolean** A function returns true if matched
 - `callback` ({getState, dispatch, nextDispatch, action}) => any
+
+### createAsyncHook(...matchers, callback)
+Calls the given callback asynchronously.
+
+Asynchronous version of `createMiddleware`.  
+It calls nextDispatch immediately.  
+
+- `matcher` string | array | ({action, getState}) => boolean
+  - **string** An action type to match
+  - **array** An array of action types to match
+  - **({action, getState}) => boolean** A function returns true if matched
+- `callback` ({getState, dispatch, action}) => any
 
 ### createFilter(...matchers, filter)
 Filters actions.

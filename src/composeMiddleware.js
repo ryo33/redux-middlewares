@@ -1,4 +1,4 @@
-module.exports = (...middlewares) => {
+export default (...middlewares) => {
   return store => next => {
     const dispatchCreators = middlewares.map(middleware => middleware(store))
     let dispatch = next

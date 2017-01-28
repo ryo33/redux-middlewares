@@ -8,7 +8,7 @@ function isMatched(matcher, getState, action) {
   }
 }
 
-module.exports = (...matchers) => {
+export default (...matchers) => {
   const callback = matchers.pop()
   return ({ getState, dispatch }) => {
     let getStateCached

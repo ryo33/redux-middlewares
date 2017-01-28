@@ -1,6 +1,6 @@
-const createMiddleware = require('./createMiddleware.js')
+import createMiddleware from './createMiddleware.js'
 
-module.exports = (...matchers) => {
+export default (...matchers) => {
   const replacer = matchers.pop()
   const callback = ({getState, dispatch, action}) => {
     return dispatch(replacer({getState, action}))

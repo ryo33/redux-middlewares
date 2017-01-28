@@ -1,13 +1,6 @@
-const composeMiddleware = require('./composeMiddleware.js')
-const createMiddleware = require('./createMiddleware.js')
-const createFilter = require('./createFilter.js')
-const createTransformer = require('./createTransformer.js')
-const createReplacer = require('./createReplacer.js')
-
-module.exports = {
-  composeMiddleware,
-  createMiddleware,
-  createFilter,
-  createTransformer,
-  createReplacer
-}
+export { default as composeMiddleware } from './composeMiddleware.js'
+export { default as createMiddleware } from './createMiddleware.js'
+export { default as createFilter } from './createFilter.js'
+export { default as createTransformer } from './createTransformer.js'
+export { default as createReplacer } from './createReplacer.js'
+export { default as createAsyncHook } from './createAsyncHook.js'

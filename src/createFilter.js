@@ -1,6 +1,6 @@
-const createMiddleware = require('./createMiddleware.js')
+import createMiddleware from './createMiddleware.js'
 
-module.exports = (...matchers) => {
+export default (...matchers) => {
   const filter = matchers.pop()
   const negatedFilter = (arg) => !filter(arg)
   return createMiddleware(...matchers, negatedFilter, () => {})
